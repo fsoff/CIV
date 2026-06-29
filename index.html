@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIV Assessment Tool</title>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #000000;
+      --muted: #666666;
+      --border: 2px;
+      --radius: 14px;
+      --font: Arial, Helvetica, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: var(--font);
+      line-height: 1.35;
+    }
+
+    .wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 12px 0;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+
+    p {
+      margin: 0 0 10px 0;
+    }
+
+    .panel {
+      border: var(--border) solid #000;
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 18px;
+      background: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+    }
+
+    .subgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    textarea {
+      width: 100%;
+      border: 2px solid #000;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      background: #fff;
+      color: #000;
+    }
+
+    textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    .indicator-row {
+      display: grid;
+      grid-template-columns: minmax(170px, 1fr) 120px 60px;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border: 1.5px solid #000;
+      border-radius: 12px;
+    }
+
+    .indicator-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .indicator-help {
+      display: block;
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 3px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #000;
+      cursor: pointer;
+    }
+
+    .score-box {
+      border: 2px solid #000;
+      border-radius: 10px;
+      text-align: center;
+      padding: 8px 0;
+      font-weight: 700;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .summary-box {
+      border: 2px solid #000;
+      border-radius: 12px;
+      padding: 12px;
+    }
+
+    .summary-box .label {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .summary-box .value {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .chart-panel {
+      border: 2px solid #000;
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .chart-title {
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #fff;
+      border: 1.5px solid #000;
+      border-radius: 12px;
+    }
+
+    .note,
+    .small {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .rule-box {
+      border: 1.5px solid #000;
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 2px solid #000;
+      border-radius: 12px;
+      background: #fff;
+      color: #000;
+      padding: 10px 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #f5f5f5;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    #submitStatus {
+      margin-top: 10px;
+      min-height: 1.2em;
+    }
+
+    @media (max-width: 1100px) {
+      .grid,
+      .subgrid,
+      .summary-grid,
+      .indicator-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+
+    <div class="panel">
+      <h1>CIV Assessment Tool</h1>
+      <p>
+        This tool assesses the <strong>Civic Interactive Value</strong> of a digital planning or management platform.
+        The CIV level is automatically calculated from the implementation indicators.
+      </p>
+      <p class="small">
+        Scores range from <strong>1 to 7</strong>: 1 = absent, 4 = functional, 7 = exemplary.
+      </p>
+    </div>
+
+    <div class="grid">
+
+      <div>
+        <div class="panel">
+          <h2>Platform information</h2>
+
+          <div class="field">
+            <label for="platformName">Platform name</label>
+            <input id="platformName" type="text" placeholder="e.g. MSP geoportal, storymap, dashboard..." />
+          </div>
+
+          <div class="field">
+            <label for="platformType">Platform type</label>
+            <input id="platformType" type="text" placeholder="e.g. geoportal / consultation tool / dashboard" />
+          </div>
+
+          <div class="field">
+            <label for="assessor">Assessor</label>
+            <input id="assessor" type="text" placeholder="Your name" />
+          </div>
+
+          <div class="field">
+            <label for="notes">Assessment notes</label>
+            <textarea id="notes" placeholder="Observations on usability, participation, strengths, weaknesses..."></textarea>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Implementation indicators</h2>
+          <div id="implementationInputs"></div>
+        </div>
+
+        <div class="panel">
+          <h2>User-group target level</h2>
+          <div id="userInputs"></div>
+
+          <div class="buttons">
+            <button id="submitBtn" type="button">Submit to Google Sheet</button>
+            <button id="resetBtn" type="button">Reset scores</button>
+            <button id="exportBtn" type="button">Export JSON</button>
+            <button id="printBtn" type="button">Print / Save PDF</button>
+          </div>
+
+          <p id="submitStatus" class="note"></p>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h2>Calculated CIV result</h2>
+
+          <div class="summary-grid">
+            <div class="summary-box">
+              <div class="label">CIV level</div>
+              <div class="value" id="civLevel">CIV 1</div>
+            </div>
+
+            <div class="summary-box">
+              <div class="label">Implementation average</div>
+              <div class="value" id="impAverage">1.0 / 7</div>
+            </div>
+
+            <div class="summary-box">
+              <div class="label">User-group average</div>
+              <div class="value" id="userAverage">1.0 / 7</div>
+            </div>
+          </div>
+
+          <div class="rule-box">
+            <strong id="civLabel">Technical access</strong>
+            <p id="civDescription" class="small">
+              The platform provides basic access to data, maps or documents, mostly for expert use.
+            </p>
+          </div>
+
+          <div class="note">
+            The CIV level is assigned according to the highest level whose minimum implementation conditions are met.
+          </div>
+        </div>
+
+        <div class="subgrid">
+          <div class="chart-panel">
+            <div class="chart-title">Implementation radar</div>
+            <svg id="implementationChart" viewBox="0 0 560 560"></svg>
+          </div>
+
+          <div class="chart-panel">
+            <div class="chart-title">User-group radar</div>
+            <svg id="userChart" viewBox="0 0 560 560"></svg>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0Azt8Jt32TRm9-a0zi0i508lrFFstajKBLRYSYh2xA2CfcGOVHJWiLj-Qu7R95veUZw/exec";
+
+    const SESSION_ID = window.crypto && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `civ-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const implementationIndicators = [
+      { key: "dataAccess", label: "Data access", help: "Relevant spatial, environmental, social, economic or planning data are accessible." },
+      { key: "dataInteroperability", label: "Data interoperability", help: "Data are structured for reuse across systems and standards." },
+      { key: "dataDownloadable", label: "Data downloadable", help: "Datasets, maps, reports or outputs can be downloaded." },
+      { key: "dataInput", label: "Data input / upload", help: "Users can upload data, documents, evidence or local knowledge." },
+      { key: "writtenComment", label: "Written comment / survey", help: "Users can provide textual feedback, comments or survey responses." },
+      { key: "visualComment", label: "Visual comment", help: "Users can comment on images, diagrams, dashboards or map objects." },
+      { key: "geosurvey", label: "Geosurvey", help: "Users can provide spatial feedback through points, lines, polygons or map annotations." },
+      { key: "dataVisualisation", label: "Data visualisation", help: "Complex data are translated into readable maps, charts or visual outputs." },
+      { key: "dataExploration", label: "Data exploration", help: "Users can filter, compare, query, combine layers or explore alternatives." },
+      { key: "narrative", label: "Narrative", help: "The platform provides guidance, explanations, legends, contextualisation and data storytelling." }
+    ];
+
+    const userGroups = [
+      { key: "experts", label: "Technical experts", help: "Fit for expert and data-intensive users." },
+      { key: "authorities", label: "Public authorities", help: "Fit for planners, administrations and decision-makers." },
+      { key: "stakeholders", label: "Sectoral stakeholders", help: "Fit for economic, environmental and territorial actors." },
+      { key: "civilSociety", label: "Civil society / NGOs", help: "Fit for associations, advocacy groups and organised publics." },
+      { key: "citizens", label: "Citizens", help: "Fit for non-expert and general public users." }
+    ];
+
+    const implementationValues = {};
+    const userValues = {};
+
+    const CIV_RULES = [
+      {
+        level: 7,
+        title: "Co-creation and civic decision-support",
+        description: "The platform enables continuous civic input, co-creation of knowledge, traceable contributions and decision-support functions.",
+        test: v =>
+          avg(v) >= 5.5 &&
+          v.dataInput >= 5 &&
+          v.writtenComment >= 5 &&
+          v.geosurvey >= 5 &&
+          v.dataExploration >= 5 &&
+          v.dataVisualisation >= 5 &&
+          v.narrative >= 5
+      },
+      {
+        level: 6,
+        title: "Scenario exploration and deliberation",
+        description: "The platform allows users to explore alternatives, compare scenarios, understand trade-offs and engage with data narratives.",
+        test: v =>
+          avg(v) >= 4.8 &&
+          v.dataExploration >= 5 &&
+          v.dataVisualisation >= 4 &&
+          v.narrative >= 4
+      },
+      {
+        level: 5,
+        title: "Spatial and visual participation",
+        description: "The platform allows users to contribute spatially or visually through geosurveys, visual comments, drawing tools or uploads.",
+        test: v =>
+          avg(v) >= 4.0 &&
+          v.writtenComment >= 3 &&
+          (
+            v.geosurvey >= 4 ||
+            v.visualComment >= 4 ||
+            v.dataInput >= 4
+          )
+      },
+      {
+        level: 4,
+        title: "Consultation",
+        description: "The platform allows structured feedback through written comments, forms, public consultation tools or surveys.",
+        test: v =>
+          avg(v) >= 3.5 &&
+          v.writtenComment >= 4 &&
+          v.narrative >= 3
+      },
+      {
+        level: 3,
+        title: "Public communication",
+        description: "The platform communicates planning content to wider audiences through accessible narratives, visualisation or simplified interfaces.",
+        test: v =>
+          avg(v) >= 3.0 &&
+          v.dataAccess >= 3 &&
+          v.dataVisualisation >= 4 &&
+          v.narrative >= 4
+      },
+      {
+        level: 2,
+        title: "Technical usability and transparency",
+        description: "The platform makes technical content accessible and usable, mainly for professionals or institutional actors.",
+        test: v =>
+          avg(v) >= 2.5 &&
+          v.dataAccess >= 3 &&
+          (
+            v.dataInteroperability >= 3 ||
+            v.dataDownloadable >= 3
+          )
+      },
+      {
+        level: 1,
+        title: "Technical access",
+        description: "The platform provides basic access to data, maps or documents, mostly for expert use.",
+        test: () => true
+      }
+    ];
+
+    function avg(values) {
+      const arr = Object.values(values);
+      if (!arr.length) return 0;
+      return arr.reduce((sum, value) => sum + Number(value), 0) / arr.length;
+    }
+
+    function calculateCIV(values) {
+      return CIV_RULES.find(rule => rule.test(values));
+    }
+
+    function createSliderRow(item, targetObj, container) {
+      targetObj[item.key] = 1;
+
+      const row = document.createElement("div");
+      row.className = "indicator-row";
+
+      const label = document.createElement("div");
+      label.className = "indicator-name";
+      label.innerHTML = `${item.label}<span class="indicator-help">${item.help}</span>`;
+
+      const range = document.createElement("input");
+      range.type = "range";
+      range.min = 1;
+      range.max = 7;
+      range.step = 1;
+      range.value = 1;
+      range.id = item.key;
+
+      const score = document.createElement("div");
+      score.className = "score-box";
+      score.id = `${item.key}Value`;
+      score.textContent = "1";
+
+      range.addEventListener("input", () => {
+        targetObj[item.key] = Number(range.value);
+        score.textContent = range.value;
+        updateAll();
+      });
+
+      row.appendChild(label);
+      row.appendChild(range);
+      row.appendChild(score);
+
+      container.appendChild(row);
+    }
+
+    implementationIndicators.forEach(item => {
+      createSliderRow(item, implementationValues, document.getElementById("implementationInputs"));
+    });
+
+    userGroups.forEach(item => {
+      createSliderRow(item, userValues, document.getElementById("userInputs"));
+    });
+
+    function updateSummary() {
+      const civ = calculateCIV(implementationValues);
+      const implementationAverage = avg(implementationValues);
+      const userAverage = avg(userValues);
+
+      document.getElementById("civLevel").textContent = `CIV ${civ.level}`;
+      document.getElementById("civLabel").textContent = civ.title;
+      document.getElementById("civDescription").textContent = civ.description;
+      document.getElementById("impAverage").textContent = `${implementationAverage.toFixed(1)} / 7`;
+      document.getElementById("userAverage").textContent = `${userAverage.toFixed(1)} / 7`;
+    }
+
+    function polarToCartesian(cx, cy, r, angleDeg) {
+      const angleRad = (angleDeg - 90) * Math.PI / 180;
+      return {
+        x: cx + r * Math.cos(angleRad),
+        y: cy + r * Math.sin(angleRad)
+      };
+    }
+
+    function drawRadarChart(svgId, labels, valuesObj) {
+      const svg = document.getElementById(svgId);
+      svg.innerHTML = "";
+
+      const width = 560;
+      const height = 560;
+      const cx = width / 2;
+      const cy = height / 2;
+      const maxR = 190;
+      const levels = 7;
+      const count = labels.length;
+      const angleStep = 360 / count;
+
+      function addSVG(tag, attrs) {
+        const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+        Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+        svg.appendChild(el);
+        return el;
+      }
+
+      for (let level = 1; level <= levels; level++) {
+        const points = [];
+        const r = (maxR / levels) * level;
+
+        for (let i = 0; i < count; i++) {
+          const point = polarToCartesian(cx, cy, r, i * angleStep);
+          points.push(`${point.x},${point.y}`);
+        }
+
+        addSVG("polygon", {
+          points: points.join(" "),
+          fill: "none",
+          stroke: "#000",
+          "stroke-width": level === levels ? "2" : "1"
+        });
+      }
+
+      for (let i = 0; i < count; i++) {
+        const angle = i * angleStep;
+        const end = polarToCartesian(cx, cy, maxR, angle);
+
+        addSVG("line", {
+          x1: cx,
+          y1: cy,
+          x2: end.x,
+          y2: end.y,
+          stroke: "#000",
+          "stroke-width": "1.5"
+        });
+
+        const labelPoint = polarToCartesian(cx, cy, maxR + 44, angle);
+        const anchor =
+          labelPoint.x < cx - 8 ? "end" :
+          labelPoint.x > cx + 8 ? "start" : "middle";
+
+        const text = addSVG("text", {
+          x: labelPoint.x,
+          y: labelPoint.y,
+          fill: "#000",
+          "font-size": "12",
+          "font-family": "Arial, Helvetica, sans-serif",
+          "text-anchor": anchor
+        });
+
+        const words = labels[i].label.split(" ");
+        let line = "";
+        let lines = [];
+
+        words.forEach(word => {
+          const test = line ? `${line} ${word}` : word;
+          if (test.length > 16) {
+            if (line) lines.push(line);
+            line = word;
+          } else {
+            line = test;
+          }
+        });
+
+        if (line) lines.push(line);
+
+        lines.forEach((l, index) => {
+          const tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+          tspan.setAttribute("x", labelPoint.x);
+          tspan.setAttribute("dy", index === 0 ? "0" : "14");
+          tspan.textContent = l;
+          text.appendChild(tspan);
+        });
+      }
+
+      for (let level = 1; level <= levels; level++) {
+        const point = polarToCartesian(cx, cy, (maxR / levels) * level, 0);
+        addSVG("text", {
+          x: point.x + 6,
+          y: point.y - 4,
+          fill: "#000",
+          "font-size": "10",
+          "font-family": "Arial, Helvetica, sans-serif"
+        }).textContent = level;
+      }
+
+      const dataPoints = [];
+
+      labels.forEach((label, index) => {
+        const value = valuesObj[label.key];
+        const r = (maxR / levels) * value;
+        const point = polarToCartesian(cx, cy, r, index * angleStep);
+        dataPoints.push(`${point.x},${point.y}`);
+      });
+
+      addSVG("polygon", {
+        points: dataPoints.join(" "),
+        fill: "rgba(0,0,0,0.08)",
+        stroke: "#000",
+        "stroke-width": "3"
+      });
+
+      labels.forEach((label, index) => {
+        const value = valuesObj[label.key];
+        const r = (maxR / levels) * value;
+        const point = polarToCartesian(cx, cy, r, index * angleStep);
+
+        addSVG("circle", {
+          cx: point.x,
+          cy: point.y,
+          r: "4",
+          fill: "#000"
+        });
+      });
+    }
+
+    function updateCharts() {
+      drawRadarChart("implementationChart", implementationIndicators, implementationValues);
+      drawRadarChart("userChart", userGroups, userValues);
+    }
+
+    function updateAll() {
+      updateSummary();
+      updateCharts();
+    }
+
+    function buildSubmissionPayload() {
+      const civ = calculateCIV(implementationValues);
+
+      return {
+        sessionId: SESSION_ID,
+        submittedAtClient: new Date().toISOString(),
+
+        platformName: document.getElementById("platformName").value,
+        platformType: document.getElementById("platformType").value,
+        assessor: document.getElementById("assessor").value,
+        notes: document.getElementById("notes").value,
+
+        calculatedCIV: {
+          level: civ.level,
+          title: civ.title,
+          description: civ.description
+        },
+
+        implementationScores: { ...implementationValues },
+        userGroupScores: { ...userValues },
+
+        implementationAverage: avg(implementationValues).toFixed(2),
+        userGroupAverage: avg(userValues).toFixed(2)
+      };
+    }
+
+    async function submitAssessmentToGoogleSheet() {
+      const status = document.getElementById("submitStatus");
+      const button = document.getElementById("submitBtn");
+
+      button.disabled = true;
+      status.textContent = "Submitting assessment...";
+
+      const payload = buildSubmissionPayload();
+
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        status.textContent = "Assessment submitted. Check the Responses_raw sheet.";
+      } catch (error) {
+        console.error(error);
+        status.textContent = "Submission failed. Check the Apps Script deployment URL and permissions.";
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    document.getElementById("submitBtn").addEventListener("click", submitAssessmentToGoogleSheet);
+
+    document.getElementById("resetBtn").addEventListener("click", () => {
+      document.querySelectorAll('input[type="range"]').forEach(range => {
+        range.value = 1;
+        const key = range.id;
+
+        if (implementationValues.hasOwnProperty(key)) {
+          implementationValues[key] = 1;
+        }
+
+        if (userValues.hasOwnProperty(key)) {
+          userValues[key] = 1;
+        }
+
+        document.getElementById(`${key}Value`).textContent = "1";
+      });
+
+      document.getElementById("submitStatus").textContent = "";
+      updateAll();
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const payload = buildSubmissionPayload();
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
+        type: "application/json"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "civ_assessment.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => {
+      window.print();
+    });
+
+    updateAll();
+  </script>
+</body>
+</html>
